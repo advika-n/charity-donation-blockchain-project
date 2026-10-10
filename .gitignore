@@ -143,3 +143,14 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+
+cache/
+artifacts/
+# anchored: Hardhat's generated TypeChain bindings at the repo root only —
+# unanchored "types/" would also swallow frontend/src/types/ (and any other
+# nested types/ folder), which is a real source dir, not build output.
+/types/
+
+# ad-hoc local test files (e.g. api/.testfiles/ used for manual upload testing)
+.testfiles/
