@@ -14,7 +14,7 @@ function req(name: string): string {
 }
 function num(name: string, dflt: number): number {
   const v = process.env[name];
-  return v === undefined ? dflt : Number(v);
+  return v === undefined || v === "" ? dflt : Number(v);
 }
 
 /**

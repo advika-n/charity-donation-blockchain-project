@@ -9,7 +9,7 @@ pragma solidity ^0.8.28;
 ///         registry can move reputation and (eventually) slash stake.
 ///
 /// DESIGN: An interface is a *contract-to-contract API boundary*. We put only
-///         the four functions MilestoneVoting actually calls here — not the
+///         the functions MilestoneVoting actually calls here — not the
 ///         `stake()` / `withdraw()` functions, because no other contract calls
 ///         those (users call them directly). Keeping interfaces minimal means
 ///         a caller can't accidentally depend on internals, and the compiler
@@ -35,9 +35,9 @@ interface IVerifierRegistry {
     ///
     /// DESIGN: Thresholds are measured against the *whole verifier set*, not just
     ///         the verifiers who showed up. That makes non-participation behave
-    ///         like a soft "no". A production build would likely snapshot this
-    ///         value when a round opens so mid-round staking can't move the goal
-    ///         posts — noted here as a future change.
+    ///         like a soft "no". MilestoneVoting snapshots this value when a
+    ///         round opens (`Round.weightSnapshot`), so mid-round staking can't
+    ///         move the goal posts.
     function totalWeight() external view returns (uint256);
 
     /// @notice Report how one verifier voted relative to the final consensus of a

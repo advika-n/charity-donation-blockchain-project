@@ -4,6 +4,7 @@ import type { Server } from "node:http";
 import { buildApp } from "../src/server.js";
 import { pool } from "../src/db.js";
 import { resolveDeployment } from "../src/deployment.js";
+import { config } from "../src/config.js";
 
 describe("Charity API Integration Tests", () => {
   let server: Server;
@@ -34,7 +35,7 @@ describe("Charity API Integration Tests", () => {
     const data = await res.json();
     assert.equal(data.ok, true);
     assert.ok(data.deployment);
-    assert.equal(data.deployment.chainId, "31337");
+    assert.equal(data.deployment.chainId, config.chainId.toString());
   });
 
   test("GET /stats returns platform metrics", async () => {

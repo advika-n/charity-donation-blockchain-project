@@ -471,7 +471,7 @@ export function CampaignDetail({ campaignId, onBack, onDonateClick }: Props) {
             </span>
           </div>
           <p style={{ color: "var(--color-text-muted)", fontSize: "0.9rem" }}>
-            Autonomous escrow deployed on Ethereum. Funds are released strictly sequentially upon milestone proof and verifier consensus.
+            Autonomous escrow deployed on Ethereum. Each milestone is paid out independently once its proof passes verifier consensus and the challenge window.
           </p>
         </div>
 
@@ -572,15 +572,25 @@ export function CampaignDetail({ campaignId, onBack, onDonateClick }: Props) {
 
             const isReleasable = isTimelocked && now >= m.releaseAfter;
             const timelockRemainingSec = isTimelocked ? Math.max(0, m.releaseAfter - now) : 0;
+            // raiseDispute() reverts once the window closes, so hide the button then.
+            const canDispute = isTimelocked && now < m.releaseAfter;
 
             const totalSnap = Number(m.weightSnapshot);
             const appWeight = Number(m.approveWeight);
-            const approvalPct = totalSnap > 0 ? Math.round((appWeight * 100) / totalSnap) : 0;
-            const approvalReached = approvalPct >= 66;
+            const approvalPct = totalSnap > 0 ? Math.floor((appWeight * 100) / totalSnap) : 0;
+            // Same integer check as MilestoneVoting._approvalReached — a rounded
+            // percentage would show "Finalize" at 65.5% and the tx would revert.
+            const approvalReached =
+              m.weightSnapshot > 0n && m.approveWeight * 100n >= m.weightSnapshot * 66n;
 
-            const disputeSnap = Number(m.weightSnapshot);
             const dispWeight = Number(m.disputeWeight);
-            const disputePct = disputeSnap > 0 ? Math.round((dispWeight * 100) / disputeSnap) : 0;
+            const disputePct = totalSnap > 0 ? Math.floor((dispWeight * 100) / totalSnap) : 0;
+
+            const roundOpen = m.roundStatus === 1;
+            const votingActive = roundOpen && now < m.deadline;
+            // A rejected round leaves the milestone Pending and the contract lets a
+            // fresh round open, so offer it whenever no round is currently open.
+            const canOpenRound = m.hasProof && isPending && !roundOpen;
 
             return (
               <article
@@ -701,7 +711,7 @@ export function CampaignDetail({ campaignId, onBack, onDonateClick }: Props) {
                   >
                     <AlertTriangle size={16} color="var(--color-danger)" style={{ flexShrink: 0 }} />
                     <span>
-                      <strong>Milestone Disputed:</strong> Over 20% of verifier weight challenged this milestone.
+                      <strong>Milestone Disputed:</strong> At least 20% of verifier weight challenged this milestone.
                       Funds are frozen safely in escrow pending resolution in the Governance & Admin panel.
                     </span>
                   </div>
@@ -823,33 +833,22 @@ export function CampaignDetail({ campaignId, onBack, onDonateClick }: Props) {
                     </div>
 
                     {m.roundStatus === 0 ? (
-                      <div>
-                        <p style={{ margin: "0 0 0.75rem", fontSize: "0.85rem", color: "var(--color-text-dim)" }}>
-                          No active voting round on this milestone.
-                        </p>
-                        {m.hasProof && isPending && (
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-secondary"
-                            onClick={() => handleOpenRound(m.id)}
-                            disabled={actionLoading !== null || campaign.available < m.amount}
-                          >
-                            <Vote size={13} />
-                            <span>
-                              {actionLoading === `open-${m.id}`
-                                ? "Opening Round…"
-                                : campaign.available < m.amount
-                                  ? "Insufficient Balance to Open"
-                                  : "Open Community Voting Round"}
-                            </span>
-                          </button>
-                        )}
-                      </div>
+                      <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--color-text-dim)" }}>
+                        No active voting round on this milestone.
+                      </p>
                     ) : (
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.825rem" }}>
                           <span>
-                            Round #{m.roundIndex} ({m.roundStatus === 1 ? "Voting Active" : "Finalized"})
+                            Round #{m.roundIndex} (
+                            {roundOpen
+                              ? votingActive
+                                ? "Voting Active"
+                                : "Voting Closed"
+                              : m.approved
+                                ? "Approved"
+                                : "Rejected"}
+                            )
                           </span>
                           <strong>{approvalPct}% Approval (&ge;66% needed)</strong>
                         </div>
@@ -866,9 +865,9 @@ export function CampaignDetail({ campaignId, onBack, onDonateClick }: Props) {
                           />
                         </div>
 
-                        {m.roundStatus === 1 && (
+                        {roundOpen && (
                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.25rem" }}>
-                            {isVerifier && !m.userVoted && (
+                            {isVerifier && !m.userVoted && votingActive && (
                               <>
                                 <button
                                   type="button"
@@ -913,8 +912,30 @@ export function CampaignDetail({ campaignId, onBack, onDonateClick }: Props) {
                       </div>
                     )}
 
+                    {canOpenRound && (
+                      <div>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => handleOpenRound(m.id)}
+                          disabled={actionLoading !== null || campaign.available < m.amount}
+                        >
+                          <Vote size={13} />
+                          <span>
+                            {actionLoading === `open-${m.id}`
+                              ? "Opening Round…"
+                              : campaign.available < m.amount
+                                ? "Insufficient Balance to Open"
+                                : m.roundIndex > 0
+                                  ? "Open New Voting Round"
+                                  : "Open Community Voting Round"}
+                          </span>
+                        </button>
+                      </div>
+                    )}
+
                     {/* Dispute flag button during timelock */}
-                    {isTimelocked && isVerifier && !m.userDisputed && (
+                    {canDispute && isVerifier && !m.userDisputed && (
                       <div style={{ marginTop: "0.25rem" }}>
                         <button
                           type="button"

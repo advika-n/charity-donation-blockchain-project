@@ -38,7 +38,7 @@ The TrustFund protocol consists of 4 tightly wired, cross-authorized smart contr
 1. **`CampaignEscrow.sol`**:
    - Holds donated ETH safely in non-custodial escrow, partitioned into creator-defined milestones.
    - Enforces the fund accounting invariant: `reserved <= balance`.
-   - Transitions milestones: `Pending` ➔ `Timelocked` (48h challenge window) ➔ `Released` (paid to beneficiary) or `Disputed` ➔ `Rejected` (funds unreserved).
+   - Transitions milestones: `Pending` ➔ `Timelocked` (48h challenge window) ➔ `Released` (paid to beneficiary), or `Timelocked` ➔ `Disputed` ➔ owner resolves to `Released` (upheld) or `Rejected` (funds unreserved).
    - Chainlink Automation compatible (`checkUpkeep` / `performUpkeep`).
 
 2. **`VerifierRegistry.sol`**:
@@ -111,10 +111,16 @@ CORS_ORIGIN=*
 PINATA_JWT=
 ```
 
-### 3. `frontend/.env.local`
+### 3. `frontend/.env`
 ```ini
 VITE_API_BASE_URL=http://localhost:4000
 VITE_CHAIN_ID=31337
+# Optional — default to the local Hardhat deploy addresses. Set them when
+# pointing at Sepolia; they must match indexer/.env and api/.env.
+VITE_ESCROW_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
+VITE_REGISTRY_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+VITE_VOTING_ADDRESS=0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+VITE_PROOFS_ADDRESS=0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
 ```
 
 ---

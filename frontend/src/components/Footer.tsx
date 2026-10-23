@@ -5,6 +5,7 @@ import {
   MILESTONE_VOTING_ADDRESS,
   PROOF_REGISTRY_ADDRESS,
   TARGET_CHAIN_ID,
+  chainName,
 } from "../lib/constants";
 import { shortenAddress } from "../lib/format";
 import { ShieldCheck } from "lucide-react";
@@ -102,7 +103,7 @@ export function Footer({ onTabChange, onCreateClick }: FooterProps) {
 
         {/* Verified Contracts */}
         <div>
-          <h4 className="footer-col-title">Core Contracts ({TARGET_CHAIN_ID === 31337 ? "Local 31337" : "Sepolia"})</h4>
+          <h4 className="footer-col-title">Core Contracts ({chainName(TARGET_CHAIN_ID)})</h4>
           <ul className="footer-links">
             <li>
               <span style={{ fontSize: "0.75rem", color: "var(--color-text-dim)", display: "block" }}>Escrow</span>

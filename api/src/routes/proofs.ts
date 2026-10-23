@@ -84,7 +84,7 @@ const fileUpload = multer({
  * off-chain storage step ONLY. There is no ethers.js/provider/signer anywhere
  * in this file (or in config.ts/errors.ts) and there must never be one here —
  * the API holds no private key. Submitting ProofRegistry.submitProof(cid) is
- * the verifier's own wallet transaction (frontend + MetaMask), signed
+ * the campaign beneficiary's own wallet transaction (frontend + MetaMask), signed
  * client-side with the cid this endpoint hands back. If you're looking for
  * where the CID becomes an on-chain fact, it's not in this process at all —
  * it's the frontend tx, then indexer/handlers.ts's ProofSubmitted handler.

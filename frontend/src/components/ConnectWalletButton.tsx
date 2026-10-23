@@ -1,5 +1,5 @@
 import { useWallet } from "../lib/useWallet";
-import { SEPOLIA_CHAIN_ID } from "../lib/constants";
+import { TARGET_CHAIN_ID, chainName } from "../lib/constants";
 import { shortenAddress } from "../lib/format";
 
 export function ConnectWalletButton() {
@@ -10,7 +10,7 @@ export function ConnectWalletButton() {
   }
 
   if (status === "connected" && address) {
-    const wrongNetwork = chainId !== SEPOLIA_CHAIN_ID;
+    const wrongNetwork = chainId !== TARGET_CHAIN_ID;
     return (
       <div>
         <span>{shortenAddress(address)}</span>{" "}
@@ -18,7 +18,7 @@ export function ConnectWalletButton() {
           Disconnect
         </button>
         {wrongNetwork && (
-          <p role="alert">Wrong network — please switch to Sepolia in MetaMask</p>
+          <p role="alert">Wrong network — please switch to {chainName(TARGET_CHAIN_ID)} in MetaMask</p>
         )}
       </div>
     );

@@ -21,10 +21,11 @@ import {ICampaignEscrow} from "./interfaces/ICampaignEscrow.sol";
 ///   round — without letting anyone rewrite the proof of a milestone that has
 ///   already moved on.
 ///
-///   Residual gap: `Pending` does not distinguish "no round yet" from "round
-///   mid-vote" (an open round does not change escrow state), so the CID can still
-///   be swapped while verifiers are voting. Closing that belongs in
-///   MilestoneVoting (pin the CID into the Round at open, re-check at finalize).
+///   Mid-vote resubmission: `Pending` does not distinguish "no round yet" from
+///   "round mid-vote", so the CID here can still be replaced while verifiers are
+///   voting. That is safe because MilestoneVoting pins the CID into the Round
+///   when it opens (`Round.proofCID`); a later resubmission only affects the
+///   NEXT round, never the one already under review.
 contract ProofRegistry is IProofRegistry {
     /// @notice Escrow used to resolve each campaign's beneficiary and each
     ///         milestone's state. Set once at construction.

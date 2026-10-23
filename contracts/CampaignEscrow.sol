@@ -69,9 +69,8 @@ contract CampaignEscrow is ICampaignEscrow, IAutomationCompatible {
     uint256 private constant MAX_MILESTONES = 50;
 
     /// @notice Hard cap on how many milestones a single `performUpkeep` call
-    ///         releases. Bounds on-chain gas the same way MilestoneVoting caps
-    ///         its per-round voter loop. `checkUpkeep` never returns more pairs
-    ///         than this.
+    ///         releases, so one upkeep transaction has bounded gas.
+    ///         `checkUpkeep` never returns more pairs than this.
     uint256 public constant MAX_UPKEEP_BATCH = 20;
 
     /// @notice Default number of campaigns `checkUpkeep` scans when it is given

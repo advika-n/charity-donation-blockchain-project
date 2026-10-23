@@ -126,7 +126,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     const handleChainChanged = (...args: unknown[]) => {
       const chainIdHex = args[0] as string;
-      setState((s) => ({ ...s, chainId: parseInt(chainIdHex, 16) }));
+      // An ethers v6 BrowserProvider pins the network it first detected and
+      // throws "network changed" on every later call, so build a fresh one.
+      setState((s) => ({
+        ...s,
+        chainId: parseInt(chainIdHex, 16),
+        provider: s.provider ? getInjectedProvider() : null,
+      }));
     };
 
     window.ethereum?.on?.("accountsChanged", handleAccountsChanged);

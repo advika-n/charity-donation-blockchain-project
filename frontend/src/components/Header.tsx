@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useWallet } from "../lib/useWallet";
 import { shortenAddress } from "../lib/format";
-import { TARGET_CHAIN_ID } from "../lib/constants";
+import { TARGET_CHAIN_ID, chainName } from "../lib/constants";
 import { useTheme } from "../lib/ThemeContext";
 import { TrustFundLogo } from "./TrustFundLogo";
 
@@ -155,7 +155,7 @@ export function Header({ activeTab, onTabChange, onCreateClick }: Props) {
               {isCorrectNetwork ? (
                 <div className="network-badge" title={`Chain ID: ${chainId}`}>
                   <span className="network-dot online"></span>
-                  <span>{chainId === 31337 ? "Hardhat Local" : "Sepolia"}</span>
+                  <span>{chainName(chainId)}</span>
                 </div>
               ) : (
                 <button

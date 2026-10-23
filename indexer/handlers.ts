@@ -174,12 +174,16 @@ const escrow: Record<string, Handler> = {
 
 // ── VerifierRegistry ───────────────────────────────────────────────────────
 const registry: Record<string, Handler> = {
+  // stake() emits ReputationChanged BEFORE VerifierJoined, so the row usually
+  // already exists here — first_joined_block must be set on the conflict path too.
   async VerifierJoined(c, env, a, log) {
     await c.query(
       `INSERT INTO verifiers (deployment_id, address, is_verifier, first_joined_block)
        VALUES ($1,$2,true,$3)
        ON CONFLICT (deployment_id, address)
-       DO UPDATE SET is_verifier = true, updated_at = now()`,
+       DO UPDATE SET is_verifier = true,
+                     first_joined_block = COALESCE(verifiers.first_joined_block, EXCLUDED.first_joined_block),
+                     updated_at = now()`,
       [env.deploymentId, A(a.verifier), log.blockNumber],
     );
   },

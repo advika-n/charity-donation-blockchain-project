@@ -56,14 +56,15 @@ interface ICampaignEscrow {
     /// @notice Begin the 48-hour release window for an approved milestone.
     /// @dev MUST be callable only by the wired MilestoneVoting contract.
     ///      Called from MilestoneVoting.finalizeRound() once weighted approval
-    ///      reaches 66% of total verifier weight.
+    ///      reaches 66% of the round's verifier-weight snapshot.
     function startTimelock(uint256 campaignId, uint256 milestoneId) external;
 
-    /// @notice Flag a milestone as disputed, which permanently blocks release()
-    ///         until the dispute is resolved by whatever governance path you add later.
+    /// @notice Flag a milestone as disputed, which blocks release() until the
+    ///         owner resolves it with CampaignEscrow.resolveDispute().
     /// @dev MUST be callable only by the wired MilestoneVoting contract. Called
-    ///      from MilestoneVoting.raiseDispute() once dissent reaches 20% of total
-    ///      verifier weight, and only while the timelock window is still open.
+    ///      from MilestoneVoting.raiseDispute() once dissent reaches 20% of the
+    ///      round's verifier-weight snapshot, and only while the timelock window
+    ///      is still open.
     function raiseDispute(uint256 campaignId, uint256 milestoneId) external;
 
     /// @notice Pay the milestone amount to the campaign beneficiary.
@@ -99,8 +100,10 @@ interface ICampaignEscrow {
 
     /// @notice Full detail of one milestone.
     /// @dev MilestoneVoting reads `state` (must be Pending before a round may
-    ///      open) and `amount` (for its event trail). `releaseAfter` is only
-    ///      meaningful once the milestone is Timelocked.
+    ///      open), `amount` (for the funding pre-check against
+    ///      availableBalance), and `releaseAfter` (to reject disputes once the
+    ///      timelock window has closed). `releaseAfter` is only meaningful once
+    ///      the milestone is Timelocked.
     function getMilestone(uint256 campaignId, uint256 milestoneId)
         external
         view

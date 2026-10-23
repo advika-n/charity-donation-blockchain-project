@@ -17,8 +17,9 @@ import {ICampaignEscrow} from "./interfaces/ICampaignEscrow.sol";
 ///     `msg.sender`'s own balances.
 ///   - The reputation / strike / pending-vote hooks are `onlyMilestoneVoting`.
 ///   - `milestoneVoting` is wired once by the deployer and then frozen.
-///   - This contract makes exactly one outbound call (to `escrow` during a
-///     slash) and it is the last thing a slash does (checks-effects-interactions).
+///   - Outbound calls are limited to two places, each the last statement of
+///     its function (checks-effects-interactions): the ETH refund in
+///     `unstake()` and `escrow.creditSlashed` during a slash.
 contract VerifierRegistry is IVerifierRegistry {
     // ─────────────────────────────────────────────────────────────────────────
     // Config (immutable)

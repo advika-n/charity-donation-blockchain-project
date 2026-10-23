@@ -40,12 +40,13 @@ interface IMilestoneVoting {
     function castVote(uint256 campaignId, uint256 milestoneId, bool approve) external;
 
     /// @notice Close the round, tally weighted votes, push reward/penalty results
-    ///         to VerifierRegistry, and — if approval >= 66% of total weight —
+    ///         to VerifierRegistry, and — if approval >= 66% of the weight
+    ///         snapshot taken at open —
     ///         call CampaignEscrow.startTimelock().
     function finalizeRound(uint256 campaignId, uint256 milestoneId) external;
 
     /// @notice Register a verifier's objection during the 48h timelock window.
-    ///         Once objections reach 20% of total verifier weight, this calls
+    ///         Once objections reach 20% of the round's weight snapshot, this calls
     ///         CampaignEscrow.raiseDispute() and release is blocked.
     function raiseDispute(uint256 campaignId, uint256 milestoneId) external;
 }

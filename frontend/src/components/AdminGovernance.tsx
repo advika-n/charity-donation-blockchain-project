@@ -44,13 +44,15 @@ export function AdminGovernance() {
       ]);
       setContractOwner(ownerAddr);
       setUnallocatedSlashed(unallocated);
-      if (!sweepTo && address) setSweepTo(address);
+      // Functional update so sweepTo is not a dependency: otherwise every
+      // keystroke re-ran loadData and clearing the field refilled it.
+      if (address) setSweepTo((prev) => prev || address);
     } catch {
       /* ignore */
     } finally {
       setLoading(false);
     }
-  }, [provider, address, sweepTo]);
+  }, [provider, address]);
 
   useEffect(() => {
     void loadData();
@@ -210,7 +212,7 @@ export function AdminGovernance() {
         </div>
 
         <p style={{ fontSize: "0.875rem", color: "var(--color-text-muted)", lineHeight: 1.5 }}>
-          When &ge;20% of verifiers dispute a timelocked milestone, funds are frozen. The contract
+          When &ge;20% of verifier weight disputes a timelocked milestone, funds are frozen. The contract
           administrator must arbitrate whether the deliverable evidence meets requirements.
         </p>
 
